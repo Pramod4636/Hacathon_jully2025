@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, BackgroundTasks
 from sqlalchemy.orm import Session
 from . import crud, schemas, models
 from .database import get_db
 from typing import List
 from sqlalchemy import func, case
 from datetime import timedelta
+import time
+import random
 
 router = APIRouter()
 
@@ -104,4 +106,40 @@ def recent_activity(db: Session = Depends(get_db)):
             "action": action,
             "time": status.last_checked.strftime("%b %d, %H:%M") if status.last_checked else "-",
         })
-    return activity 
+    return activity
+
+def simulate_check(db: Session, server_id: int, check_type: str):
+    # Set status to Running
+    status = db.query(models.ServerStatus).filter_by(server_id=server_id, is_current=True).first()
+    if not status:
+        return
+    if check_type == 'precheck':
+        status.precheck_status = 'Running'
+    else:
+        status.postcheck_status = 'Running'
+    db.commit()
+    # Simulate check duration
+    time.sleep(2)
+    # Randomly pass or fail
+    result = random.choice(['Passed', 'Failed'])
+    if check_type == 'precheck':
+        status.precheck_status = result
+        # Optionally, update migration_status if passed
+        if result == 'Passed':
+            status.migration_status = 'Migrated'
+    else:
+        status.postcheck_status = result
+        # Optionally, update migration_status if passed
+        if result == 'Passed':
+            status.migration_status = 'Completed'
+    db.commit()
+
+@router.post("/servers/{server_id}/run-precheck")
+def run_precheck(server_id: int, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    background_tasks.add_task(simulate_check, db, server_id, 'precheck')
+    return {"message": "PreCheck started", "status": "running"}
+
+@router.post("/servers/{server_id}/run-postcheck")
+def run_postcheck(server_id: int, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    background_tasks.add_task(simulate_check, db, server_id, 'postcheck')
+    return {"message": "PostCheck started", "status": "running"} 

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ServerDetailsModal } from "./ServerDetailsModal";
-import { Filter, Users, Settings } from "lucide-react";
+import { Filter, Users, Settings, Loader2 } from "lucide-react";
 
 type Server = {
   id: number;
@@ -41,12 +41,29 @@ export function ServerGrid() {
   const [searchTerm, setSearchTerm] = useState("");
   const [environmentFilter, setEnvironmentFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [runningCheck, setRunningCheck] = useState<{[key: number]: 'precheck' | 'postcheck' | null}>({});
 
   useEffect(() => {
     fetch("http://localhost:8000/api/servers")
       .then(res => res.json())
       .then(data => setServers(data));
   }, []);
+
+  const runCheck = (serverId: number, type: 'precheck' | 'postcheck') => {
+    setRunningCheck(prev => ({ ...prev, [serverId]: type }));
+    fetch(`http://localhost:8000/api/servers/${serverId}/run-${type}`, { method: "POST" })
+      .then(res => res.json())
+      .then(() => {
+        // Optionally show a toast
+        // Refresh server data after a short delay to allow backend to update
+        setTimeout(() => {
+          fetch("http://localhost:8000/api/servers")
+            .then(res => res.json())
+            .then(data => setServers(data));
+          setRunningCheck(prev => ({ ...prev, [serverId]: null }));
+        }, 1500);
+      });
+  };
 
   const filteredServers = servers.filter((server) => {
     const matchesSearch = server.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -144,6 +161,14 @@ export function ServerGrid() {
               <TableBody>
                 {filteredServers.map((server) => {
                   const latestStatus = server.statuses && server.statuses.length > 0 ? server.statuses[server.statuses.length - 1] : {};
+                  const canRunPreCheck =
+                    (latestStatus?.migration_status === "Ready") &&
+                    (!latestStatus?.precheck_status || latestStatus?.precheck_status === "N/A" || latestStatus?.precheck_status === "Not Started");
+                  const canRunPostCheck =
+                    (latestStatus?.migration_status === "Migrated") &&
+                    (!latestStatus?.postcheck_status || latestStatus?.postcheck_status === "N/A" || latestStatus?.postcheck_status === "Not Started");
+                  const isRunningPre = runningCheck[server.id] === 'precheck';
+                  const isRunningPost = runningCheck[server.id] === 'postcheck';
                   return (
                     <TableRow key={server.id} className="hover:bg-gray-50">
                       <TableCell className="font-medium">{server.name}</TableCell>
@@ -171,7 +196,7 @@ export function ServerGrid() {
                       <TableCell className="text-sm text-gray-600">{latestStatus?.issue_summary || "-"}</TableCell>
                       <TableCell className="text-sm text-gray-500">{latestStatus?.last_checked ? new Date(latestStatus.last_checked).toLocaleString() : "-"}</TableCell>
                       <TableCell>
-                        <div className="flex gap-2">
+                        <div className="flex flex-col gap-2 min-w-[120px]">
                           <Button
                             size="sm"
                             variant="outline"
@@ -194,9 +219,28 @@ export function ServerGrid() {
                           >
                             Details
                           </Button>
-                          <Button size="sm" variant="outline">
-                            Re-run
-                          </Button>
+                          {canRunPreCheck && (
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              disabled={isRunningPre}
+                              onClick={() => runCheck(server.id, 'precheck')}
+                            >
+                              {isRunningPre ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
+                              Run PreCheck
+                            </Button>
+                          )}
+                          {canRunPostCheck && (
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              disabled={isRunningPost}
+                              onClick={() => runCheck(server.id, 'postcheck')}
+                            >
+                              {isRunningPost ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
+                              Run PostCheck
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
