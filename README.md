@@ -71,3 +71,10 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## Backend (FastAPI)
+
+A new `backend/` folder will be created at the project root. This will contain the FastAPI backend code, including database models, API endpoints, and configuration for serving data to the frontend dashboard.
+
+- To start the backend, follow the instructions in `backend/README.md` (to be created).
+- The backend will connect to your local PostgreSQL database and provide REST API endpoints for servers, statuses, alerts, and dashboard data.

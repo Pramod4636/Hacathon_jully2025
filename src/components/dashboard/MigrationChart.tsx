@@ -1,15 +1,18 @@
-
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 
-const data = [
-  { name: "PreCheck Passed", value: 89, fill: "#10b981" },
-  { name: "PreCheck Failed", value: 23, fill: "#ef4444" },
-  { name: "PostCheck Passed", value: 31, fill: "#6366f1" },
-  { name: "PostCheck Failed", value: 4, fill: "#f59e0b" },
-];
+const COLORS = ["#10b981", "#ef4444", "#6366f1", "#f59e0b"];
 
 export function MigrationChart() {
+  const [data, setData] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch("http://localhost:8000/api/migration-chart")
+      .then(res => res.json())
+      .then(data => setData(data));
+  }, []);
+
   return (
     <Card>
       <CardHeader>
@@ -31,7 +34,7 @@ export function MigrationChart() {
               dataKey="value"
             >
               {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.fill} />
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
             <Tooltip />

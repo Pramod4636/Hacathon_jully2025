@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SummaryCards } from "./SummaryCards";
@@ -6,8 +5,17 @@ import { MigrationChart } from "./MigrationChart";
 import { TimelineChart } from "./TimelineChart";
 import { AlertsFeed } from "./AlertsFeed";
 import { Users, CheckCircle, XCircle, Clock } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export function DashboardHome() {
+  const [activity, setActivity] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch("http://localhost:8000/api/recent-activity")
+      .then(res => res.json())
+      .then(data => setActivity(data));
+  }, []);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -38,23 +46,18 @@ export function DashboardHome() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {[
-                  { server: "PROD-WEB-01", status: "success", action: "PostCheck Completed", time: "2 min ago" },
-                  { server: "UAT-DB-03", status: "warning", action: "PreCheck Warning", time: "5 min ago" },
-                  { server: "DEV-APP-02", status: "success", action: "Migration Completed", time: "12 min ago" },
-                  { server: "PROD-API-01", status: "error", action: "PostCheck Failed", time: "18 min ago" },
-                ].map((activity, i) => (
+                {activity.map((act, i) => (
                   <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center gap-3">
-                      {activity.status === "success" && <CheckCircle className="h-4 w-4 text-green-600" />}
-                      {activity.status === "warning" && <Clock className="h-4 w-4 text-yellow-600" />}
-                      {activity.status === "error" && <XCircle className="h-4 w-4 text-red-600" />}
+                      {act.status === "success" && <CheckCircle className="h-4 w-4 text-green-600" />}
+                      {act.status === "warning" && <Clock className="h-4 w-4 text-yellow-600" />}
+                      {act.status === "error" && <XCircle className="h-4 w-4 text-red-600" />}
                       <div>
-                        <p className="font-medium text-gray-900">{activity.server}</p>
-                        <p className="text-sm text-gray-600">{activity.action}</p>
+                        <p className="font-medium text-gray-900">{act.server}</p>
+                        <p className="text-sm text-gray-600">{act.action}</p>
                       </div>
                     </div>
-                    <span className="text-sm text-gray-500">{activity.time}</span>
+                    <span className="text-sm text-gray-500">{act.time}</span>
                   </div>
                 ))}
               </div>

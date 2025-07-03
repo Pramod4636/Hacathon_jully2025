@@ -1,39 +1,25 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Clock } from "lucide-react";
+import { useEffect, useState } from "react";
+
+type Alert = {
+  id: number;
+  server_id: number;
+  severity: string;
+  message: string;
+  resolved: boolean;
+  created_at: string;
+};
 
 export function AlertsFeed() {
-  const alerts = [
-    {
-      id: 1,
-      severity: "high",
-      message: "PROD-DB-01 PostCheck failed",
-      time: "2 min ago",
-      resolved: false,
-    },
-    {
-      id: 2,
-      severity: "medium",
-      message: "UAT-WEB-03 disk space warning",
-      time: "15 min ago",
-      resolved: false,
-    },
-    {
-      id: 3,
-      severity: "low",
-      message: "DEV-APP-02 migration completed",
-      time: "1 hour ago",
-      resolved: true,
-    },
-    {
-      id: 4,
-      severity: "medium",
-      message: "Network latency detected",
-      time: "2 hours ago",
-      resolved: false,
-    },
-  ];
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+
+  useEffect(() => {
+    fetch("http://localhost:8000/api/alerts")
+      .then(res => res.json())
+      .then(data => setAlerts(data));
+  }, []);
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -71,7 +57,7 @@ export function AlertsFeed() {
                   <p className="text-sm text-gray-900">{alert.message}</p>
                   <div className="flex items-center gap-1 mt-1">
                     <Clock className="h-3 w-3 text-gray-400" />
-                    <span className="text-xs text-gray-500">{alert.time}</span>
+                    <span className="text-xs text-gray-500">{new Date(alert.created_at).toLocaleString()}</span>
                   </div>
                 </div>
               </div>

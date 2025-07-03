@@ -16,6 +16,7 @@ build/
 .cache/
 bun.lockb
 
+backend/venv/
 # Dependency directories
 jspm_packages/
 

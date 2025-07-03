@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +9,19 @@ import { ServerDetailsModal } from "./ServerDetailsModal";
 import { Filter, Users, Settings } from "lucide-react";
 
 type Server = {
-  id: string;
+  id: number;
+  name: string;
+  ip_address: string;
+  environment: string;
+  os: string;
+  owner: string;
+  created_at: string;
+  statuses: any[];
+  tags: { tag: string }[];
+};
+
+type ModalServer = {
+  id: number;
   name: string;
   ip: string;
   environment: string;
@@ -24,82 +35,31 @@ type Server = {
   tags: string[];
 };
 
-const mockServers: Server[] = [
-  {
-    id: "1",
-    name: "PROD-WEB-01",
-    ip: "10.0.1.15",
-    environment: "Production",
-    migrationStatus: "Completed",
-    preCheck: "Passed",
-    postCheck: "Passed",
-    issueSummary: "None",
-    lastChecked: "2024-01-07 14:30",
-    os: "Windows Server 2019",
-    owner: "WebTeam",
-    tags: ["critical", "web-server"],
-  },
-  {
-    id: "2",
-    name: "UAT-DB-03",
-    ip: "10.0.2.22",
-    environment: "UAT",
-    migrationStatus: "Blocked",
-    preCheck: "Warning",
-    postCheck: "N/A",
-    issueSummary: "Disk space low",
-    lastChecked: "2024-01-07 14:25",
-    os: "Linux RHEL 8",
-    owner: "DBA Team",
-    tags: ["database", "monitoring"],
-  },
-  {
-    id: "3",
-    name: "DEV-APP-02",
-    ip: "10.0.3.45",
-    environment: "Development",
-    migrationStatus: "Ready",
-    preCheck: "Passed",
-    postCheck: "N/A",
-    issueSummary: "None",
-    lastChecked: "2024-01-07 14:20",
-    os: "Ubuntu 20.04",
-    owner: "DevOps",
-    tags: ["development", "app-server"],
-  },
-  {
-    id: "4",
-    name: "PROD-API-01",
-    ip: "10.0.1.33",
-    environment: "Production",
-    migrationStatus: "Failed",
-    preCheck: "Passed",
-    postCheck: "Failed",
-    issueSummary: "Service unavailable",
-    lastChecked: "2024-01-07 13:45",
-    os: "Windows Server 2022",
-    owner: "API Team",
-    tags: ["critical", "api"],
-  },
-];
-
 export function ServerGrid() {
-  const [servers] = useState<Server[]>(mockServers);
-  const [selectedServer, setSelectedServer] = useState<Server | null>(null);
+  const [servers, setServers] = useState<Server[]>([]);
+  const [selectedServer, setSelectedServer] = useState<ModalServer | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [environmentFilter, setEnvironmentFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
+  useEffect(() => {
+    fetch("http://localhost:8000/api/servers")
+      .then(res => res.json())
+      .then(data => setServers(data));
+  }, []);
+
   const filteredServers = servers.filter((server) => {
     const matchesSearch = server.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         server.ip.includes(searchTerm);
+                         server.ip_address.includes(searchTerm);
     const matchesEnv = environmentFilter === "all" || server.environment === environmentFilter;
-    const matchesStatus = statusFilter === "all" || server.migrationStatus === statusFilter;
+    const latestStatus = server.statuses && server.statuses.length > 0 ? server.statuses[server.statuses.length - 1] : null;
+    const migrationStatus = latestStatus ? latestStatus.migration_status : "";
+    const matchesStatus = statusFilter === "all" || migrationStatus === statusFilter;
     return matchesSearch && matchesEnv && matchesStatus;
   });
 
   const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
+    switch (status?.toLowerCase()) {
       case "completed": return "bg-green-100 text-green-800 border-green-200";
       case "ready": return "bg-blue-100 text-blue-800 border-blue-200";
       case "blocked": return "bg-yellow-100 text-yellow-800 border-yellow-200";
@@ -182,48 +142,66 @@ export function ServerGrid() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredServers.map((server) => (
-                  <TableRow key={server.id} className="hover:bg-gray-50">
-                    <TableCell className="font-medium">{server.name}</TableCell>
-                    <TableCell className="font-mono text-sm">{server.ip}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="text-xs">
-                        {server.environment}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getStatusColor(server.migrationStatus)}>
-                        {server.migrationStatus}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getStatusColor(server.preCheck)}>
-                        {server.preCheck}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getStatusColor(server.postCheck)}>
-                        {server.postCheck}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-gray-600">{server.issueSummary}</TableCell>
-                    <TableCell className="text-sm text-gray-500">{server.lastChecked}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => setSelectedServer(server)}
-                        >
-                          Details
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          Re-run
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {filteredServers.map((server) => {
+                  const latestStatus = server.statuses && server.statuses.length > 0 ? server.statuses[server.statuses.length - 1] : {};
+                  return (
+                    <TableRow key={server.id} className="hover:bg-gray-50">
+                      <TableCell className="font-medium">{server.name}</TableCell>
+                      <TableCell className="font-mono text-sm">{server.ip_address}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-xs">
+                          {server.environment}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getStatusColor(latestStatus?.migration_status)}>
+                          {latestStatus?.migration_status || "-"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getStatusColor(latestStatus?.precheck_status)}>
+                          {latestStatus?.precheck_status || "-"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getStatusColor(latestStatus?.postcheck_status)}>
+                          {latestStatus?.postcheck_status || "-"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-gray-600">{latestStatus?.issue_summary || "-"}</TableCell>
+                      <TableCell className="text-sm text-gray-500">{latestStatus?.last_checked ? new Date(latestStatus.last_checked).toLocaleString() : "-"}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedServer({
+                                id: server.id,
+                                name: server.name,
+                                ip: server.ip_address,
+                                environment: server.environment,
+                                migrationStatus: latestStatus?.migration_status || "-",
+                                preCheck: latestStatus?.precheck_status || "-",
+                                postCheck: latestStatus?.postcheck_status || "-",
+                                issueSummary: latestStatus?.issue_summary || "-",
+                                lastChecked: latestStatus?.last_checked ? new Date(latestStatus.last_checked).toLocaleString() : "-",
+                                os: server.os,
+                                owner: server.owner,
+                                tags: server.tags ? server.tags.map(t => t.tag) : [],
+                              });
+                            }}
+                          >
+                            Details
+                          </Button>
+                          <Button size="sm" variant="outline">
+                            Re-run
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>

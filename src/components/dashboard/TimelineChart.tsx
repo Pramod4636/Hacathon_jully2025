@@ -1,18 +1,16 @@
-
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
-const data = [
-  { date: "Jan 1", completed: 4, failed: 1 },
-  { date: "Jan 2", completed: 8, failed: 2 },
-  { date: "Jan 3", completed: 6, failed: 0 },
-  { date: "Jan 4", completed: 12, failed: 3 },
-  { date: "Jan 5", completed: 5, failed: 1 },
-  { date: "Jan 6", completed: 9, failed: 2 },
-  { date: "Jan 7", completed: 7, failed: 1 },
-];
-
 export function TimelineChart() {
+  const [data, setData] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch("http://localhost:8000/api/timeline-chart")
+      .then(res => res.json())
+      .then(data => setData(data));
+  }, []);
+
   return (
     <Card>
       <CardHeader>
