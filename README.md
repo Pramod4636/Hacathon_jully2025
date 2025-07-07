@@ -472,3 +472,389 @@ src/
 8. Test and optimize
 
 This guide will help you build the infrastructure dashboard step by step during your hackathon!
+
+---
+
+## 📊 Sample Data for Frontend Development
+
+### Mock API Endpoints Data
+
+Use these sample data objects directly in your frontend components for development:
+
+#### **Servers Data**
+```typescript
+const mockServers = [
+  {
+    id: 1,
+    name: "PROD-WEB-01",
+    ip_address: "192.168.1.10",
+    environment: "Production",
+    os: "Ubuntu 20.04 LTS",
+    owner: "Web Team",
+    created_at: "2024-01-01T10:00:00Z",
+    statuses: [
+      {
+        id: 1,
+        migration_status: "Completed",
+        precheck_status: "Passed",
+        postcheck_status: "Passed",
+        issue_summary: "All checks passed successfully",
+        last_checked: "2024-01-07T14:30:00Z",
+        is_current: true
+      }
+    ],
+    tags: [{ tag: "web-server" }, { tag: "load-balancer" }]
+  },
+  {
+    id: 2,
+    name: "PROD-DB-01",
+    ip_address: "192.168.1.11",
+    environment: "Production",
+    os: "CentOS 7",
+    owner: "DBA Team",
+    created_at: "2024-01-02T09:00:00Z",
+    statuses: [
+      {
+        id: 2,
+        migration_status: "Ready",
+        precheck_status: "Not Started",
+        postcheck_status: "N/A",
+        issue_summary: "Ready for migration",
+        last_checked: "2024-01-07T13:45:00Z",
+        is_current: true
+      }
+    ],
+    tags: [{ tag: "database" }, { tag: "primary" }]
+  },
+  {
+    id: 3,
+    name: "UAT-APP-01",
+    ip_address: "192.168.1.20",
+    environment: "UAT",
+    os: "Ubuntu 18.04 LTS",
+    owner: "DevOps Team",
+    created_at: "2024-01-03T11:00:00Z",
+    statuses: [
+      {
+        id: 3,
+        migration_status: "Blocked",
+        precheck_status: "Failed",
+        postcheck_status: "N/A",
+        issue_summary: "Disk space below threshold",
+        last_checked: "2024-01-07T12:15:00Z",
+        is_current: true
+      }
+    ],
+    tags: [{ tag: "application" }, { tag: "testing" }]
+  },
+  {
+    id: 4,
+    name: "DEV-API-01",
+    ip_address: "192.168.1.30",
+    environment: "Development",
+    os: "Ubuntu 20.04 LTS",
+    owner: "API Team",
+    created_at: "2024-01-04T14:00:00Z",
+    statuses: [
+      {
+        id: 4,
+        migration_status: "Failed",
+        precheck_status: "Passed",
+        postcheck_status: "Failed",
+        issue_summary: "Network connectivity issues",
+        last_checked: "2024-01-07T11:30:00Z",
+        is_current: true
+      }
+    ],
+    tags: [{ tag: "api" }, { tag: "development" }]
+  },
+  {
+    id: 5,
+    name: "PROD-CACHE-01",
+    ip_address: "192.168.1.12",
+    environment: "Production",
+    os: "Ubuntu 20.04 LTS",
+    owner: "Infrastructure Team",
+    created_at: "2024-01-05T08:00:00Z",
+    statuses: [
+      {
+        id: 5,
+        migration_status: "Completed",
+        precheck_status: "Passed",
+        postcheck_status: "Passed",
+        issue_summary: "Migration successful",
+        last_checked: "2024-01-07T10:45:00Z",
+        is_current: true
+      }
+    ],
+    tags: [{ tag: "cache" }, { tag: "redis" }]
+  }
+];
+```
+
+#### **Alerts Data**
+```typescript
+const mockAlerts = [
+  {
+    id: "1",
+    severity: "high",
+    title: "PostCheck Failure",
+    message: "Database connection timeout during PostCheck validation",
+    server: "PROD-DB-01",
+    team: "DBA Team",
+    timestamp: "2024-01-07 14:30",
+    resolved: false
+  },
+  {
+    id: "2",
+    severity: "medium",
+    title: "Disk Space Warning",
+    message: "Disk usage above 90% threshold",
+    server: "UAT-APP-01",
+    team: "DevOps Team",
+    timestamp: "2024-01-07 14:15",
+    resolved: false
+  },
+  {
+    id: "3",
+    severity: "low",
+    title: "Migration Completed",
+    message: "Server migration completed successfully",
+    server: "PROD-WEB-01",
+    team: "Web Team",
+    timestamp: "2024-01-07 13:45",
+    resolved: true,
+    notes: "All services verified and running"
+  },
+  {
+    id: "4",
+    severity: "medium",
+    title: "Network Latency",
+    message: "High network latency detected between servers",
+    server: "PROD-CACHE-01",
+    team: "Network Team",
+    timestamp: "2024-01-07 12:30",
+    resolved: false
+  },
+  {
+    id: "5",
+    severity: "high",
+    title: "Service Down",
+    message: "API service not responding",
+    server: "DEV-API-01",
+    team: "API Team",
+    timestamp: "2024-01-07 11:30",
+    resolved: false
+  }
+];
+```
+
+#### **Recent Activity Data**
+```typescript
+const mockRecentActivity = [
+  {
+    id: 1,
+    server: "PROD-WEB-01",
+    action: "Migration completed successfully",
+    status: "success",
+    time: "2 minutes ago"
+  },
+  {
+    id: 2,
+    server: "UAT-APP-01",
+    action: "PreCheck failed - Disk space issue",
+    status: "warning",
+    time: "5 minutes ago"
+  },
+  {
+    id: 3,
+    server: "PROD-DB-01",
+    action: "PostCheck validation started",
+    status: "warning",
+    time: "10 minutes ago"
+  },
+  {
+    id: 4,
+    server: "DEV-API-01",
+    action: "Migration failed - Network timeout",
+    status: "error",
+    time: "15 minutes ago"
+  },
+  {
+    id: 5,
+    server: "PROD-CACHE-01",
+    action: "Backup completed",
+    status: "success",
+    time: "1 hour ago"
+  }
+];
+```
+
+#### **Dashboard Summary Data**
+```typescript
+const mockDashboardSummary = {
+  totalServers: 24,
+  healthyServers: 18,
+  warningServers: 4,
+  failedServers: 2,
+  migrationProgress: 75,
+  uptime: 99.8,
+  lastBackup: "2024-01-07 02:00:00",
+  activeAlerts: 3
+};
+```
+
+#### **Chart Data for Analytics**
+```typescript
+const mockChartData = {
+  // Server health trend over time
+  serverHealthTrend: [
+    { month: "Jan", total: 20, healthy: 18, warning: 2, failed: 0 },
+    { month: "Feb", total: 22, healthy: 20, warning: 1, failed: 1 },
+    { month: "Mar", total: 24, healthy: 22, warning: 2, failed: 0 },
+    { month: "Apr", total: 26, healthy: 24, warning: 1, failed: 1 },
+    { month: "May", total: 28, healthy: 26, warning: 2, failed: 0 },
+    { month: "Jun", total: 30, healthy: 28, warning: 1, failed: 1 }
+  ],
+  
+  // Performance metrics
+  performanceMetrics: [
+    { month: "Jan", cpu: 65, memory: 70, disk: 45, network: 80 },
+    { month: "Feb", cpu: 70, memory: 75, disk: 50, network: 85 },
+    { month: "Mar", cpu: 75, memory: 80, disk: 55, network: 90 },
+    { month: "Apr", cpu: 80, memory: 85, disk: 60, network: 92 },
+    { month: "May", cpu: 85, memory: 90, disk: 65, network: 95 },
+    { month: "Jun", cpu: 90, memory: 95, disk: 70, network: 98 }
+  ],
+  
+  // Server distribution by environment
+  serverDistribution: [
+    { name: "Production", value: 12, color: "#3b82f6" },
+    { name: "UAT", value: 6, color: "#f59e0b" },
+    { name: "Development", value: 8, color: "#10b981" },
+    { name: "Staging", value: 4, color: "#8b5cf6" }
+  ],
+  
+  // Migration status breakdown
+  migrationStatus: [
+    { status: "Completed", count: 15, color: "#10b981" },
+    { status: "Ready", count: 5, color: "#3b82f6" },
+    { status: "Blocked", count: 3, color: "#f59e0b" },
+    { status: "Failed", count: 1, color: "#ef4444" }
+  ]
+};
+```
+
+#### **Reports Data**
+```typescript
+const mockReportsData = {
+  // Monthly migration report
+  monthlyMigration: [
+    { month: "January", planned: 8, completed: 7, failed: 1 },
+    { month: "February", planned: 10, completed: 9, failed: 1 },
+    { month: "March", planned: 12, completed: 11, failed: 1 },
+    { month: "April", planned: 15, completed: 14, failed: 1 },
+    { month: "May", planned: 18, completed: 17, failed: 1 },
+    { month: "June", planned: 20, completed: 19, failed: 1 }
+  ],
+  
+  // Team performance
+  teamPerformance: [
+    { team: "Web Team", servers: 8, migrations: 7, success: 85 },
+    { team: "DBA Team", servers: 6, migrations: 5, success: 83 },
+    { team: "DevOps Team", servers: 10, migrations: 9, success: 90 },
+    { team: "API Team", servers: 4, migrations: 3, success: 75 }
+  ],
+  
+  // Infrastructure costs
+  infrastructureCosts: [
+    { month: "Jan", compute: 15000, storage: 5000, network: 3000 },
+    { month: "Feb", compute: 16000, storage: 5200, network: 3100 },
+    { month: "Mar", compute: 17000, storage: 5400, network: 3200 },
+    { month: "Apr", compute: 18000, storage: 5600, network: 3300 },
+    { month: "May", compute: 19000, storage: 5800, network: 3400 },
+    { month: "Jun", compute: 20000, storage: 6000, network: 3500 }
+  ]
+};
+```
+
+### **How to Use Sample Data**
+
+#### **1. Replace API Calls with Mock Data**
+```typescript
+// Instead of:
+// fetch('/api/servers').then(res => res.json())
+
+// Use:
+const servers = mockServers;
+```
+
+#### **2. Create Data Hooks**
+```typescript
+// src/hooks/useMockData.ts
+export const useServers = () => {
+  return { data: mockServers, isLoading: false, error: null };
+};
+
+export const useAlerts = () => {
+  return { data: mockAlerts, isLoading: false, error: null };
+};
+
+export const useDashboardSummary = () => {
+  return { data: mockDashboardSummary, isLoading: false, error: null };
+};
+```
+
+#### **3. Use in Components**
+```typescript
+// In your components
+import { useServers } from '../hooks/useMockData';
+
+export const ServerGrid = () => {
+  const { data: servers } = useServers();
+  
+  return (
+    <div>
+      {servers.map(server => (
+        <div key={server.id}>{server.name}</div>
+      ))}
+    </div>
+  );
+};
+```
+
+### **Mock API Endpoints Structure**
+
+```typescript
+// Mock API responses structure
+const mockAPIEndpoints = {
+  // GET /api/servers
+  servers: mockServers,
+  
+  // GET /api/servers/{id}
+  serverDetails: (id: number) => mockServers.find(s => s.id === id),
+  
+  // GET /api/alerts
+  alerts: mockAlerts,
+  
+  // GET /api/recent-activity
+  recentActivity: mockRecentActivity,
+  
+  // GET /api/dashboard/summary
+  dashboardSummary: mockDashboardSummary,
+  
+  // GET /api/charts/server-health
+  serverHealthChart: mockChartData.serverHealthTrend,
+  
+  // GET /api/charts/performance
+  performanceChart: mockChartData.performanceMetrics,
+  
+  // POST /api/servers/{id}/run-precheck
+  runPreCheck: (id: number) => ({ success: true, message: "PreCheck completed" }),
+  
+  // POST /api/servers/{id}/run-postcheck
+  runPostCheck: (id: number) => ({ success: true, message: "PostCheck completed" })
+};
+```
+
+This sample data provides realistic infrastructure dashboard data that you can use directly in your frontend components without needing a backend during development!
