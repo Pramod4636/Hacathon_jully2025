@@ -475,15 +475,17 @@ This guide will help you build the infrastructure dashboard step by step during 
 
 ---
 
-## 📊 Sample Data for Frontend Development
+## 📊 Sample Data for Frontend Development (Type-Safe)
 
 ### Mock API Endpoints Data
 
-Use these sample data objects directly in your frontend components for development:
+Use these sample data objects directly in your frontend components for development. All data matches the TypeScript interfaces provided.
 
 #### **Servers Data**
 ```typescript
-const mockServers = [
+import { Server } from './types';
+
+export const mockServers: Server[] = [
   {
     id: 1,
     name: "PROD-WEB-01",
@@ -594,7 +596,9 @@ const mockServers = [
 
 #### **Alerts Data**
 ```typescript
-const mockAlerts = [
+import { Alert } from './types';
+
+export const mockAlerts: Alert[] = [
   {
     id: "1",
     severity: "high",
@@ -651,7 +655,9 @@ const mockAlerts = [
 
 #### **Recent Activity Data**
 ```typescript
-const mockRecentActivity = [
+import { RecentActivity } from './types';
+
+export const mockRecentActivity: RecentActivity[] = [
   {
     id: 1,
     server: "PROD-WEB-01",
@@ -692,7 +698,9 @@ const mockRecentActivity = [
 
 #### **Dashboard Summary Data**
 ```typescript
-const mockDashboardSummary = {
+import { DashboardSummary } from './types';
+
+export const mockDashboardSummary: DashboardSummary = {
   totalServers: 24,
   healthyServers: 18,
   warningServers: 4,
@@ -706,8 +714,9 @@ const mockDashboardSummary = {
 
 #### **Chart Data for Analytics**
 ```typescript
-const mockChartData = {
-  // Server health trend over time
+import { ServerHealthTrend, PerformanceMetric, ServerDistribution, MigrationStatus } from './types';
+
+export const mockChartData = {
   serverHealthTrend: [
     { month: "Jan", total: 20, healthy: 18, warning: 2, failed: 0 },
     { month: "Feb", total: 22, healthy: 20, warning: 1, failed: 1 },
@@ -715,9 +724,7 @@ const mockChartData = {
     { month: "Apr", total: 26, healthy: 24, warning: 1, failed: 1 },
     { month: "May", total: 28, healthy: 26, warning: 2, failed: 0 },
     { month: "Jun", total: 30, healthy: 28, warning: 1, failed: 1 }
-  ],
-  
-  // Performance metrics
+  ] as ServerHealthTrend[],
   performanceMetrics: [
     { month: "Jan", cpu: 65, memory: 70, disk: 45, network: 80 },
     { month: "Feb", cpu: 70, memory: 75, disk: 50, network: 85 },
@@ -725,30 +732,27 @@ const mockChartData = {
     { month: "Apr", cpu: 80, memory: 85, disk: 60, network: 92 },
     { month: "May", cpu: 85, memory: 90, disk: 65, network: 95 },
     { month: "Jun", cpu: 90, memory: 95, disk: 70, network: 98 }
-  ],
-  
-  // Server distribution by environment
+  ] as PerformanceMetric[],
   serverDistribution: [
     { name: "Production", value: 12, color: "#3b82f6" },
     { name: "UAT", value: 6, color: "#f59e0b" },
     { name: "Development", value: 8, color: "#10b981" },
     { name: "Staging", value: 4, color: "#8b5cf6" }
-  ],
-  
-  // Migration status breakdown
+  ] as ServerDistribution[],
   migrationStatus: [
     { status: "Completed", count: 15, color: "#10b981" },
     { status: "Ready", count: 5, color: "#3b82f6" },
     { status: "Blocked", count: 3, color: "#f59e0b" },
     { status: "Failed", count: 1, color: "#ef4444" }
-  ]
+  ] as MigrationStatus[]
 };
 ```
 
 #### **Reports Data**
 ```typescript
-const mockReportsData = {
-  // Monthly migration report
+import { MonthlyMigration, TeamPerformance, InfrastructureCost } from './types';
+
+export const mockReportsData = {
   monthlyMigration: [
     { month: "January", planned: 8, completed: 7, failed: 1 },
     { month: "February", planned: 10, completed: 9, failed: 1 },
@@ -756,17 +760,13 @@ const mockReportsData = {
     { month: "April", planned: 15, completed: 14, failed: 1 },
     { month: "May", planned: 18, completed: 17, failed: 1 },
     { month: "June", planned: 20, completed: 19, failed: 1 }
-  ],
-  
-  // Team performance
+  ] as MonthlyMigration[],
   teamPerformance: [
     { team: "Web Team", servers: 8, migrations: 7, success: 85 },
     { team: "DBA Team", servers: 6, migrations: 5, success: 83 },
     { team: "DevOps Team", servers: 10, migrations: 9, success: 90 },
     { team: "API Team", servers: 4, migrations: 3, success: 75 }
-  ],
-  
-  // Infrastructure costs
+  ] as TeamPerformance[],
   infrastructureCosts: [
     { month: "Jan", compute: 15000, storage: 5000, network: 3000 },
     { month: "Feb", compute: 16000, storage: 5200, network: 3100 },
@@ -774,7 +774,7 @@ const mockReportsData = {
     { month: "Apr", compute: 18000, storage: 5600, network: 3300 },
     { month: "May", compute: 19000, storage: 5800, network: 3400 },
     { month: "Jun", compute: 20000, storage: 6000, network: 3500 }
-  ]
+  ] as InfrastructureCost[]
 };
 ```
 
