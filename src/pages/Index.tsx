@@ -1,8 +1,8 @@
 
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
-import { DashboardHome } from "@/components/dashboard/DashboardHome";
-import { Toaster } from "@/components/ui/toaster";
+import { SidebarProvider } from "../components/ui/sidebar";
+import { AppSidebar } from "../components/AppSidebar";
+import { DashboardHome } from "../components/dashboard/DashboardHome";
+import { Toaster } from "../components/ui/toaster";
 
 const Index = () => {
   return (

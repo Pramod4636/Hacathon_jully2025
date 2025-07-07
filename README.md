@@ -1,80 +1,75 @@
-# Welcome to your Lovable project
+# Infra Nova Dashboard Nexus
 
-## Project info
+A React-based dashboard application for infrastructure management and monitoring.
 
-**URL**: https://lovable.dev/projects/756dfc6a-ee8d-44be-aabe-226aa661d108
+## Features
 
-## How can I edit this code?
+- Modern React 18 with TypeScript
+- Tailwind CSS for styling
+- Shadcn/ui components
+- Responsive design
+- Dashboard analytics and monitoring
+- Server management interface
+- Alerts and notifications system
 
-There are several ways of editing your application.
+## Getting Started
 
-**Use Lovable**
+### Prerequisites
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/756dfc6a-ee8d-44be-aabe-226aa661d108) and start prompting.
+- Node.js (version 16 or higher)
+- npm or yarn
 
-Changes made via Lovable will be committed automatically to this repo.
+### Installation
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+1. Install dependencies:
+```bash
+npm install
 ```
 
-**Edit a file directly in GitHub**
+2. Start the development server:
+```bash
+npm start
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+The application will be available at `http://localhost:3000`.
 
-**Use GitHub Codespaces**
+### Available Scripts
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- `npm start` - Start the development server
+- `npm run build` - Build the application for production
+- `npm run build:dev` - Build the application for development
+- `npm test` - Run tests
+- `npm run lint` - Run ESLint
 
-## What technologies are used for this project?
+## Project Structure
 
-This project is built with:
+```
+src/
+├── components/     # Reusable UI components
+├── pages/         # Page components
+├── hooks/         # Custom React hooks
+├── lib/           # Utility functions and configurations
+└── index.tsx      # Application entry point
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Technology Stack
 
-## How can I deploy this project?
+- **React 18** - UI library
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Styling
+- **Shadcn/ui** - Component library
+- **Create React App** - Build tool and development environment
 
-Simply open [Lovable](https://lovable.dev/projects/756dfc6a-ee8d-44be-aabe-226aa661d108) and click on Share -> Publish.
+## Development
 
-## Can I connect a custom domain to my Lovable project?
+This project uses Create React App for a pure React development experience. All imports use relative paths for better compatibility and simplicity.
 
-Yes, you can!
+## Building for Production
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+To create a production build:
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+```bash
+npm run build
+```
 
-## Backend (FastAPI)
-
-A new `backend/` folder will be created at the project root. This will contain the FastAPI backend code, including database models, API endpoints, and configuration for serving data to the frontend dashboard.
-
-- To start the backend, follow the instructions in `backend/README.md` (to be created).
-- The backend will connect to your local PostgreSQL database and provide REST API endpoints for servers, statuses, alerts, and dashboard data.
+The built files will be in the `build/` directory.

@@ -19,7 +19,7 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   useSidebar,
-} from "@/components/ui/sidebar";
+} from "./ui/sidebar";
 
 const items = [
   { title: "Dashboard", url: "/", icon: PieChart },

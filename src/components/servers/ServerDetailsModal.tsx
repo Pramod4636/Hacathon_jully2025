@@ -1,11 +1,11 @@
-
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
-import { CheckCircle, XCircle, AlertTriangle, Clock, FileText } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { Separator } from "../components/ui/separator";
+import { CheckCircle, XCircle, AlertTriangle, Clock, FileText, Loader2 } from "lucide-react";
+import { useState } from "react";
 
 type Server = {
   id: string;
@@ -75,6 +75,20 @@ export function ServerDetailsModal({ server, open, onClose }: ServerDetailsModal
       case "INFO": return "text-blue-600";
       default: return "text-gray-600";
     }
+  };
+
+  const [running, setRunning] = useState<'precheck' | 'postcheck' | null>(null);
+
+  const rerunCheck = (type: 'precheck' | 'postcheck') => {
+    setRunning(type);
+    fetch(`http://localhost:8000/api/servers/${server.id}/run-${type}`, { method: "POST" })
+      .then(res => res.json())
+      .then(() => {
+        setTimeout(() => {
+          setRunning(null);
+          // Optionally, trigger a parent refresh or close/reopen modal to update data
+        }, 1500);
+      });
   };
 
   return (
@@ -150,6 +164,16 @@ export function ServerDetailsModal({ server, open, onClose }: ServerDetailsModal
                   <Badge variant="outline" className={getStatusColor(server.preCheck)}>
                     {server.preCheck}
                   </Badge>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="ml-4"
+                    disabled={running === 'precheck'}
+                    onClick={() => rerunCheck('precheck')}
+                  >
+                    {running === 'precheck' ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
+                    Rerun PreCheck
+                  </Button>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -181,6 +205,16 @@ export function ServerDetailsModal({ server, open, onClose }: ServerDetailsModal
                   <Badge variant="outline" className={getStatusColor(server.postCheck)}>
                     {server.postCheck}
                   </Badge>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="ml-4"
+                    disabled={running === 'postcheck'}
+                    onClick={() => rerunCheck('postcheck')}
+                  >
+                    {running === 'postcheck' ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
+                    Rerun PostCheck
+                  </Button>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -225,14 +259,6 @@ export function ServerDetailsModal({ server, open, onClose }: ServerDetailsModal
         </Tabs>
 
         <div className="flex justify-between pt-4">
-          <div className="flex gap-2">
-            <Button variant="outline">
-              Re-run PreCheck
-            </Button>
-            <Button variant="outline">
-              Re-run PostCheck
-            </Button>
-          </div>
           <div className="flex gap-2">
             <Button variant="outline">
               Export Report
