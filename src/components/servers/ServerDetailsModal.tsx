@@ -8,7 +8,7 @@ import { CheckCircle, XCircle, AlertTriangle, Clock, FileText, Loader2 } from "l
 import { useState } from "react";
 
 type Server = {
-  id: string;
+  id: number;
   name: string;
   ip: string;
   environment: string;
