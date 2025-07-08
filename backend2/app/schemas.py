@@ -1,11 +1,10 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
 from datetime import datetime
 
 class ServerTag(BaseModel):
     tag: str
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ServerStatus(BaseModel):
     migration_status: str
@@ -14,8 +13,7 @@ class ServerStatus(BaseModel):
     issue_summary: Optional[str]
     last_checked: Optional[datetime]
     is_current: bool
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class Alert(BaseModel):
     id: int
@@ -24,8 +22,7 @@ class Alert(BaseModel):
     message: str
     resolved: bool
     created_at: datetime
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class Migration(BaseModel):
     id: int
@@ -34,8 +31,7 @@ class Migration(BaseModel):
     completed_at: Optional[datetime]
     status: Optional[str]
     notes: Optional[str]
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class Server(BaseModel):
     id: int
@@ -49,5 +45,4 @@ class Server(BaseModel):
     statuses: List[ServerStatus] = []
     alerts: List[Alert] = []
     migrations: List[Migration] = []
-    class Config:
-        orm_mode = True 
+    model_config = ConfigDict(from_attributes=True) 
