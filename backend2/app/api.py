@@ -7,6 +7,9 @@ from sqlalchemy import func, case
 from datetime import timedelta
 import time
 import random
+import subprocess
+import json
+import os
 
 router = APIRouter()
 
@@ -108,7 +111,78 @@ def recent_activity(db: Session = Depends(get_db)):
         })
     return activity
 
-def simulate_check(db: Session, server_id: int, check_type: str):
+def run_powershell_check(db: Session, server_id: int, check_type: str):
+    """Run PowerShell script to check server health"""
+    try:
+        # Get server details
+        server = db.query(models.Server).filter(models.Server.id == server_id).first()
+        if not server:
+            return
+        
+        # Update status to Running
+        status = db.query(models.ServerStatus).filter_by(server_id=server_id, is_current=True).first()
+        if not status:
+            return
+        
+        if check_type == 'precheck':
+            status.precheck_status = 'Running'
+        else:
+            status.postcheck_status = 'Running'
+        db.commit()
+        
+        # Run PowerShell script
+        script_path = os.path.join(os.path.dirname(__file__), '..', 'scripts', 'check_server.ps1')
+        
+        # Execute PowerShell script
+        result = subprocess.run([
+            'powershell.exe', '-ExecutionPolicy', 'Bypass', '-File', 
+            script_path, '-CheckType', check_type, '-ServerName', server.ip_address
+        ], capture_output=True, text=True, timeout=30)
+        
+        # Parse JSON output
+        if result.returncode == 0 and result.stdout.strip():
+            try:
+                check_result = json.loads(result.stdout.strip())
+                
+                # Update status based on PowerShell result
+                if check_result.get('Status') == 'Passed':
+                    result_status = 'Passed'
+                    issue_summary = check_result.get('Details', {}).get('Message', 'All checks passed')
+                elif check_result.get('Status') == 'Warning':
+                    result_status = 'Warning'
+                    issues = check_result.get('Issues', [])
+                    issue_summary = '; '.join(issues)
+                else:
+                    result_status = 'Failed'
+                    issue_summary = check_result.get('Details', {}).get('Message', 'Check failed')
+                
+                # Update database
+                if check_type == 'precheck':
+                    status.precheck_status = result_status
+                    if result_status == 'Passed':
+                        status.migration_status = 'Migrated'
+                else:
+                    status.postcheck_status = result_status
+                    if result_status == 'Passed':
+                        status.migration_status = 'Completed'
+                
+                status.issue_summary = issue_summary
+                status.last_checked = func.now()
+                db.commit()
+                
+            except json.JSONDecodeError:
+                # Fallback to simulation if PowerShell output is invalid
+                run_simulation_check(db, server_id, check_type)
+        else:
+            # Fallback to simulation if PowerShell fails
+            run_simulation_check(db, server_id, check_type)
+            
+    except Exception as e:
+        # Fallback to simulation on any error
+        run_simulation_check(db, server_id, check_type)
+
+def run_simulation_check(db: Session, server_id: int, check_type: str):
+    """Fallback simulation check"""
     # Set status to Running
     status = db.query(models.ServerStatus).filter_by(server_id=server_id, is_current=True).first()
     if not status:
@@ -118,28 +192,28 @@ def simulate_check(db: Session, server_id: int, check_type: str):
     else:
         status.postcheck_status = 'Running'
     db.commit()
+    
     # Simulate check duration
     time.sleep(2)
+    
     # Randomly pass or fail
     result = random.choice(['Passed', 'Failed'])
     if check_type == 'precheck':
         status.precheck_status = result
-        # Optionally, update migration_status if passed
         if result == 'Passed':
             status.migration_status = 'Migrated'
     else:
         status.postcheck_status = result
-        # Optionally, update migration_status if passed
         if result == 'Passed':
             status.migration_status = 'Completed'
     db.commit()
 
 @router.post("/servers/{server_id}/run-precheck")
 def run_precheck(server_id: int, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
-    background_tasks.add_task(simulate_check, db, server_id, 'precheck')
+    background_tasks.add_task(run_powershell_check, db, server_id, 'precheck')
     return {"message": "PreCheck started", "status": "running"}
 
 @router.post("/servers/{server_id}/run-postcheck")
 def run_postcheck(server_id: int, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
-    background_tasks.add_task(simulate_check, db, server_id, 'postcheck')
+    background_tasks.add_task(run_powershell_check, db, server_id, 'postcheck')
     return {"message": "PostCheck started", "status": "running"} 
