@@ -101,6 +101,34 @@ The `scripts/` directory contains:
 4. **Output Capture**: Use `capture_output=True` to get script output
 5. **Error Handling**: Check `returncode` and handle `stderr`
 
+## Status History Management
+
+When you trigger a precheck (or postcheck) for a server using the API endpoint:
+
+```
+POST /api/servers/{server_id}/run-precheck
+```
+
+The backend will:
+1. **Insert a new status record** into the `server_status` table for the specified server.
+2. **Mark all previous statuses** for that server as `is_current=False`.
+3. The new status is marked as `is_current=True` and starts with `precheck_status="Running"` and `migration_status="Ready"` (or as appropriate).
+4. The background task (PowerShell or simulation) will update this new status record with the result when the check completes.
+
+This approach ensures:
+- You have a full history of all status changes for each server.
+- The most recent/current status is always marked with `is_current=True`.
+- The frontend can display both the current status and the status history for each server.
+
+**Example Workflow:**
+1. User triggers a precheck for server 1.
+2. Backend inserts a new status row for server 1 with `precheck_status="Running"`.
+3. All previous status rows for server 1 are set to `is_current=False`.
+4. When the check completes, the new status row is updated with the result (e.g., `precheck_status="Passed"`).
+
+**Why?**
+- This design allows for robust audit trails and easy troubleshooting, as you can see every status change over time for each server.
+
 ## Folder Structure
 - `app/` - FastAPI application code
 - `requirements.txt` - Python dependencies
